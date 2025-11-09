@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIO - Sistema Integrado de Ocorrências</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="text-gray-800">
+<!-- Header / Logo -->
+<header class="text-center py-12 bg-white shadow-sm border-b">
+  <div class="flex flex-col items-center fade-in">
+    <div class="bg-blue-100 p-4 rounded-2xl mb-4">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo SIO" class="w-20 h-20">
+    </div>
+    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">SIO</h1>
+    <p class="text-xl text-gray-600 mt-2">Sistema Integrado de Ocorrências</p>
+    <p class="text-gray-500 mt-4 max-w-2xl">
+      Gerencie e acompanhe ocorrências com praticidade, segurança e eficiência.
+    </p>
+  </div>
+</header>
+
+  <!-- Seção principal com fundo -->
+  <section class="bg-overlay text-white py-24 px-6 text-center">
+    <div class="max-w-4xl mx-auto fade-in">
+      <h2 class="text-5xl font-bold mb-6">Como posso ajudar hoje?</h2>
+      <p class="text-xl mb-12 opacity-90">
+        Nosso sistema facilita o registro e acompanhamento de ocorrências de forma prática, segura e organizada.
+      </p>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <a href="/registrar" class="btn-primary text-lg font-semibold py-4 px-12 rounded-2xl transition-all duration-300">
+          📝 Registrar Ocorrência
+        </a>
+        <a href="/consultar" class="btn-secondary text-lg font-semibold py-4 px-12 rounded-2xl transition-all duration-300">
+          📋 Consultar Ocorrências
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recursos -->
+  <section class="py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Recursos do Sistema</h2>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center p-6 fade-in">
+          <div class="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">🚨</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Registro Rápido</h3>
+          <p class="text-gray-600">Registre ocorrências em poucos minutos com nosso formulário intuitivo.</p>
+        </div>
+        
+        <div class="text-center p-6 fade-in">
+          <div class="bg-green-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">📊</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Acompanhamento</h3>
+          <p class="text-gray-600">Acompanhe o status de todas as ocorrências em tempo real.</p>
+        </div>
+        
+        <div class="text-center p-6 fade-in">
+          <div class="bg-purple-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl">📎</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Anexos</h3>
+          <p class="text-gray-600">Adicione fotos e documentos para melhor documentação.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Estatísticas -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold text-gray-800 mb-12">Sistema em Números</h2>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="fade-in">
+          <div class="text-3xl font-bold text-blue-600" id="statsOcorrencias">0</div>
+          <div class="text-gray-600">Ocorrências</div>
+        </div>
+        <div class="fade-in">
+          <div class="text-3xl font-bold text-green-600" id="statsResolvidas">0</div>
+          <div class="text-gray-600">Resolvidas</div>
+        </div>
+        <div class="fade-in">
+          <div class="text-3xl font-bold text-orange-600" id="statsAndamento">0</div>
+          <div class="text-gray-600">Em Andamento</div>
+        </div>
+        <div class="fade-in">
+          <div class="text-3xl font-bold text-purple-600" id="statsCategorias">0</div>
+          <div class="text-gray-600">Categorias</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rodapé -->
+  <footer class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-8 mb-6">
+        <a href="/registrar" class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-semibold transition-colors">
+          📝 Começar Agora
+        </a>
+        <a href="/consultar" class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-lg font-semibold transition-colors">
+          📋 Ver Ocorrências
+        </a>
+      </div>
+      <p class="text-blue-100">&copy; 2025 SIO - Sistema Integrado de Ocorrências</p>
+      <p class="text-blue-200 text-sm mt-2">Desenvolvido para fins acadêmicos</p>
+    </div>
+  </footer>
+
+  <script>
+    // Carrega estatísticas para a página inicial
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/estatisticas')
+        .then(res => res.json())
+        .then(estatisticas => {
+          document.getElementById('statsOcorrencias').textContent = estatisticas.total;
+          document.getElementById('statsCategorias').textContent = estatisticas.total_categorias;
+          
+          // Estatísticas simuladas (você pode expandir depois)
+          document.getElementById('statsResolvidas').textContent = Math.floor(estatisticas.total * 0.6);
+          document.getElementById('statsAndamento').textContent = Math.floor(estatisticas.total * 0.4);
+        })
+        .catch(console.error);
+      
+      // Anima elementos
+      setTimeout(() => {
+        document.querySelectorAll('.fade-in').forEach((el, index) => {
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }, index * 200);
+        });
+      }, 100);
+    });
+  </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

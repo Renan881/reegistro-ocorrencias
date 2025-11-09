@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin - SIO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-100">
+
+  <!-- Header Admin -->
+<header class="bg-white shadow-sm border-b">
+  <div class="max-w-7xl mx-auto px-4 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="bg-blue-100 p-3 rounded-xl">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo SIO" class="w-8 h-8">
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-blue-700">SIO Admin</h1>
+          <p class="text-gray-600 text-sm">Painel Administrativo</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <div class="text-right">
+          <p class="font-semibold text-gray-800" id="adminNome">Administrador</p>
+          <p class="text-sm text-gray-500" id="adminUsuario">admin</p>
+        </div>
+        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" id="adminAvatar">
+          A
+        </div>
+        <a href="/admin/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+          🚪 Sair
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    
+    <!-- Estatísticas Rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Total Ocorrências</p>
+            <p class="text-3xl font-bold text-blue-600" id="statsTotal">0</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-xl">
+            <span class="text-2xl">📋</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Pendentes</p>
+            <p class="text-3xl font-bold text-orange-500" id="statsPendentes">0</p>
+          </div>
+          <div class="bg-orange-100 p-3 rounded-xl">
+            <span class="text-2xl">⏳</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Em Andamento</p>
+            <p class="text-3xl font-bold text-blue-500" id="statsAndamento">0</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-xl">
+            <span class="text-2xl">🔄</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Resolvidas</p>
+            <p class="text-3xl font-bold text-green-600" id="statsResolvidas">0</p>
+          </div>
+          <div class="bg-green-100 p-3 rounded-xl">
+            <span class="text-2xl">✅</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros e Ações -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-gray-200">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <h2 class="text-xl font-bold text-gray-800">📊 Todas as Ocorrências</h2>
+        
+        <div class="flex flex-wrap gap-3">
+          <select id="filtroStatus" class="border rounded-lg p-2">
+            <option value="">Todos os status</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Em Andamento">Em Andamento</option>
+            <option value="Resolvido">Resolvido</option>
+          </select>
+          
+          <select id="filtroCategoria" class="border rounded-lg p-2">
+            <option value="">Todas as categorias</option>
+            <option value="Infraestrutura">Infraestrutura</option>
+            <option value="Equipamento">Equipamento</option>
+            <option value="Segurança">Segurança</option>
+            <option value="Limpeza">Limpeza</option>
+            <option value="Outros">Outros</option>
+          </select>
+          
+          <button onclick="aplicarFiltros()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold">
+            🔍 Filtrar
+          </button>
+          
+          <button onclick="limparFiltros()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold">
+            🗑️ Limpar
+          </button>
+          
+          <button onclick="recarregarDados()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold">
+            🔄 Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingOcorrencias" class="text-center py-12 hidden">
+      <div class="loading-spinner mb-4"></div>
+      <p class="text-gray-600 font-semibold">Carregando ocorrências...</p>
+    </div>
+
+    <!-- Lista de Ocorrências -->
+    <div id="listaOcorrencias" class="space-y-4 transition-opacity duration-300">
+      <!-- Ocorrências carregadas via JavaScript -->
+    </div>
+
+    <!-- Mensagem quando não há ocorrências -->
+    <div id="semOcorrencias" class="text-center py-16 hidden">
+      <div class="text-6xl mb-6">📭</div>
+      <h3 class="text-2xl font-bold text-gray-700 mb-4">Nenhuma ocorrência encontrada</h3>
+      <p class="text-gray-500 mb-8">Não há ocorrências com os filtros selecionados.</p>
+      <button onclick="limparFiltros()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+        🔄 Mostrar Todas
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Modal de Resposta -->
+  <div id="modalResposta" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-gray-800">✍️ Responder Ocorrência</h3>
+        <button onclick="fecharModalResposta()" class="text-gray-500 hover:text-gray-700 text-2xl">
+          ×
+        </button>
+      </div>
+
+      <div id="detalhesOcorrencia" class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <!-- Detalhes da ocorrência carregados via JS -->
+      </div>
+
+      <form id="formResposta" class="space-y-4">
+        <input type="hidden" id="ocorrenciaId" name="ocorrencia_id">
+        
+        <div>
+          <label class="block font-semibold text-gray-700 mb-2">Resposta *</label>
+          <textarea id="mensagemResposta" name="mensagem" rows="6" 
+                    class="form-input w-full rounded-lg p-3 resize-none"
+                    placeholder="Digite sua resposta para esta ocorrência..."
+                    required></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-gray-700 mb-2">Anexo (Opcional)</label>
+          <input type="file" name="anexo" 
+                 class="form-input w-full rounded-lg p-3"
+                 accept="image/*,.pdf,.doc,.docx">
+          <p class="text-sm text-gray-500 mt-1">Formatos: imagens, PDF, Word (máx. 5MB)</p>
+        </div>
+
+        <div class="flex space-x-3 pt-4">
+          <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2">
+            <span>📨</span>
+            <span>Enviar Resposta</span>
+          </button>
+          <button type="button" onclick="fecharModalResposta()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes -->
+  <div id="modalDetalhes" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-gray-800">📋 Detalhes da Ocorrência</h3>
+        <button onclick="fecharModalDetalhes()" class="text-gray-500 hover:text-gray-700 text-2xl">
+          ×
+        </button>
+      </div>
+
+      <div id="conteudoDetalhes">
+        <!-- Conteúdo carregado via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado global do admin
+    let estadoAdmin = {
+      ocorrencias: [],
+      filtroStatus: '',
+      filtroCategoria: '',
+      carregando: false
+    };
+
+    // Quando a página carrega
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔄 Iniciando painel admin...');
+      carregarDadosAdmin();
+      carregarOcorrenciasAdmin();
+      
+      // Inicializa eventos dos filtros
+      document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+      document.getElementById('filtroCategoria').addEventListener('change', aplicarFiltros);
+    });
+
+    // Carrega dados do admin e estatísticas
+    async function carregarDadosAdmin() {
+      try {
+        const respostaStats = await fetch('/admin/api/estatisticas');
+        const stats = await respostaStats.json();
+        
+        if (respostaStats.ok) {
+          document.getElementById('statsTotal').textContent = stats.total;
+          document.getElementById('statsPendentes').textContent = stats.pendentes;
+          document.getElementById('statsAndamento').textContent = stats.em_andamento;
+          document.getElementById('statsResolvidas').textContent = stats.resolvidas;
+        }
+      } catch (erro) {
+        console.error('Erro ao carregar estatísticas:', erro);
+      }
+    }
+
+    // Carrega ocorrências para o admin
+    async function carregarOcorrenciasAdmin() {
+      console.log('📋 Buscando ocorrências para admin...');
+      
+      const lista = document.getElementById('listaOcorrencias');
+      const semOcorrencias = document.getElementById('semOcorrencias');
+      const loading = document.getElementById('loadingOcorrencias');
+
+      if (!lista) return;
+
+      // Mostra loading
+      estadoAdmin.carregando = true;
+      if (loading) loading.classList.remove('hidden');
+      if (lista) lista.classList.add('opacity-50');
+
+      try {
+        const resposta = await fetch('/admin/api/ocorrencias');
+        console.log(`📨 Status da API: ${resposta.status}`);
+        
+        if (!resposta.ok) throw new Error(`Erro HTTP: ${resposta.status}`);
+        
+        const ocorrencias = await resposta.json();
+        estadoAdmin.ocorrencias = ocorrencias;
+        
+        console.log(`✅ Recebidas ${ocorrencias.length} ocorrências para admin`);
+        renderizarOcorrenciasAdmin(ocorrencias);
+
+      } catch (erro) {
+        console.error('❌ Erro ao carregar ocorrências:', erro);
+        mostrarErroCarregamentoAdmin(erro);
+      } finally {
+        estadoAdmin.carregando = false;
+        if (loading) loading.classList.add('hidden');
+        if (lista) lista.classList.remove('opacity-50');
+      }
+    }
+
+    function renderizarOcorrenciasAdmin(ocorrencias) {
+      const lista = document.getElementById('listaOcorrencias');
+      const semOcorrencias = document.getElementById('semOcorrencias');
+
+      // Aplica filtros
+      ocorrencias = aplicarFiltrosLocais(ocorrencias);
+
+      // Limpa lista
+      lista.innerHTML = '';
+
+      if (ocorrencias.length === 0) {
+        console.log('📭 Nenhuma ocorrência encontrada para admin');
+        if (semOcorrencias) semOcorrencias.classList.remove('hidden');
+        return;
+      }
+
+      // Esconde mensagem "sem ocorrências"
+      if (semOcorrencias) semOcorrencias.classList.add('hidden');
+
+      // Adiciona cada ocorrência
+      ocorrencias.forEach((ocorrencia, index) => {
+        const card = criarCardOcorrenciaAdmin(ocorrencia);
+        lista.appendChild(card);
+        
+        // Anima a entrada
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+
+      console.log('🎉 Ocorrências exibidas no painel admin!');
+    }
+
+    function aplicarFiltrosLocais(ocorrencias) {
+      const filtroStatus = document.getElementById('filtroStatus').value;
+      const filtroCategoria = document.getElementById('filtroCategoria').value;
+      
+      let ocorrenciasFiltradas = ocorrencias;
+      
+      if (filtroStatus) {
+        ocorrenciasFiltradas = ocorrenciasFiltradas.filter(occ => occ.status === filtroStatus);
+      }
+      
+      if (filtroCategoria) {
+        ocorrenciasFiltradas = ocorrenciasFiltradas.filter(occ => occ.categoria === filtroCategoria);
+      }
+      
+      return ocorrenciasFiltradas;
+    }
+
+    function criarCardOcorrenciaAdmin(ocorrencia) {
+      const card = document.createElement('div');
+      card.className = 'card-hover bg-white rounded-xl border border-gray-200 p-6';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'all 0.6s ease';
+      
+      const badgeClass = obterClasseBadge(ocorrencia.categoria);
+      const statusClass = obterClasseStatus(ocorrencia.status);
+      const hasResposta = ocorrencia.resposta_count > 0;
+      
+      card.innerHTML = `
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-3 mb-3">
+              <h3 class="text-xl font-bold text-gray-900">${ocorrencia.titulo || 'Sem título'}</h3>
+              <span class="${statusClass} px-3 py-1 rounded-full text-sm font-semibold">
+                ${ocorrencia.status || 'Pendente'}
+              </span>
+              ${hasResposta ? `
+                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                  💬 Respondida
+                </span>
+              ` : ''}
+            </div>
+            
+            <p class="text-gray-600 leading-relaxed mb-3">${ocorrencia.descricao || 'Sem descrição'}</p>
+            
+            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+              <span class="flex items-center space-x-1">
+                <span class="${badgeClass} px-2 py-1 rounded text-xs">${ocorrencia.categoria || 'Geral'}</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span>📅</span>
+                <span>${ocorrencia.data || 'Data não informada'}</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span>🆔</span>
+                <span>#${ocorrencia.id}</span>
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-2">
+            <button onclick="verDetalhesOcorrencia(${ocorrencia.id})" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2">
+              <span>👁️</span>
+              <span>Detalhes</span>
+            </button>
+            
+            ${!hasResposta ? `
+              <button onclick="abrirModalResposta(${ocorrencia.id})" 
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2">
+                <span>✍️</span>
+                <span>Responder</span>
+              </button>
+            ` : `
+              <button onclick="verRespostas(${ocorrencia.id})" 
+                      class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2">
+                <span>💬</span>
+                <span>Ver Resposta</span>
+              </button>
+            `}
+            
+            <button onclick="alterarStatus(${ocorrencia.id}, 'Em Andamento')" 
+                    class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors ${ocorrencia.status === 'Em Andamento' ? 'opacity-50 cursor-not-allowed' : ''}">
+              🔄 Andamento
+            </button>
+            
+            <button onclick="alterarStatus(${ocorrencia.id}, 'Resolvido')" 
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors ${ocorrencia.status === 'Resolvido' ? 'opacity-50 cursor-not-allowed' : ''}">
+              ✅ Resolver
+            </button>
+          </div>
+        </div>
+        
+        ${ocorrencia.anexo ? `
+          <div class="pt-4 border-t border-gray-100">
+            <a href="${ocorrencia.anexo}" target="_blank" 
+               class="inline-flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+              <span>📎</span>
+              <span>Ver Anexo da Ocorrência</span>
+            </a>
+          </div>
+        ` : ''}
+      `;
+      
+      return card;
+    }
+
+    function obterClasseStatus(status) {
+      const classes = {
+        'Pendente': 'bg-yellow-100 text-yellow-800',
+        'Em Andamento': 'bg-blue-100 text-blue-800',
+        'Resolvido': 'bg-green-100 text-green-800'
+      };
+      return classes[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function obterClasseBadge(categoria) {
+      const classes = {
+        'Infraestrutura': 'badge-infra',
+        'Equipamento': 'badge-equip',
+        'Segurança': 'badge-seguranca',
+        'Limpeza': 'badge-limpeza',
+        'Outros': 'badge-outros'
+      };
+      return classes[categoria] || 'badge-outros';
+    }
+
+    // ========== SISTEMA DE STATUS ==========
+    async function alterarStatus(ocorrenciaId, novoStatus) {
+      try {
+        const response = await fetch(`/admin/api/ocorrencias/${ocorrenciaId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: novoStatus })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          mostrarToast(`✅ ${result.mensagem}`, 'success');
+          carregarOcorrenciasAdmin();
+          carregarDadosAdmin();
+        } else {
+          mostrarToast(`❌ ${result.erro}`, 'error');
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        mostrarToast('❌ Erro ao alterar status', 'error');
+      }
+    }
+
+    // ========== SISTEMA DE MODAIS ==========
+    function abrirModalResposta(ocorrenciaId) {
+      const ocorrencia = estadoAdmin.ocorrencias.find(occ => occ.id === ocorrenciaId);
+      if (ocorrencia) {
+        document.getElementById('ocorrenciaId').value = ocorrenciaId;
+        
+        // Preenche detalhes da ocorrência
+        document.getElementById('detalhesOcorrencia').innerHTML = `
+          <h4 class="font-semibold text-gray-800 mb-2">📋 Ocorrência #${ocorrencia.id}</h4>
+          <p><strong>Título:</strong> ${ocorrencia.titulo}</p>
+          <p><strong>Categoria:</strong> ${ocorrencia.categoria}</p>
+          <p><strong>Status:</strong> ${ocorrencia.status}</p>
+          <p><strong>Descrição:</strong> ${ocorrencia.descricao}</p>
+          <p><strong>Data:</strong> ${ocorrencia.data}</p>
+        `;
+        
+        // Abre o modal
+        document.getElementById('modalResposta').classList.remove('hidden');
+      }
+    }
+
+    function fecharModalResposta() {
+      document.getElementById('modalResposta').classList.add('hidden');
+      document.getElementById('formResposta').reset();
+    }
+
+    async function verDetalhesOcorrencia(ocorrenciaId) {
+      try {
+        const response = await fetch(`/admin/api/ocorrencias/${ocorrenciaId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          abrirModalDetalhes(data);
+        } else {
+          mostrarToast(`❌ ${data.erro}`, 'error');
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        mostrarToast('❌ Erro ao carregar detalhes', 'error');
+      }
+    }
+
+    function abrirModalDetalhes(dados) {
+      const { ocorrencia, respostas, historico } = dados;
+      
+      let historicoHTML = '';
+      if (historico && historico.length > 0) {
+        historicoHTML = `
+          <div class="mt-6">
+            <h4 class="font-semibold text-gray-800 mb-3">📊 Histórico de Status</h4>
+            <div class="timeline">
+              ${historico.map(item => `
+                <div class="timeline-item ${item.status_novo.toLowerCase().replace(' ', '-')}">
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <p class="font-medium">Status alterado para <span class="font-bold">${item.status_novo}</span></p>
+                    <p class="text-sm text-gray-600">Por: ${item.admin_nome}</p>
+                    <p class="text-sm text-gray-500">Em: ${item.data_mudanca_formatada}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      let respostasHTML = '';
+      if (respostas && respostas.length > 0) {
+        respostasHTML = `
+          <div class="mt-6">
+            <h4 class="font-semibold text-gray-800 mb-3">💬 Respostas (${respostas.length})</h4>
+            ${respostas.map(resposta => `
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                <div class="flex justify-between items-start mb-2">
+                  <p class="font-semibold text-green-800">${resposta.admin_nome}</p>
+                  <p class="text-sm text-green-600">${resposta.data_resposta_formatada}</p>
+                </div>
+                <p class="text-green-700">${resposta.mensagem}</p>
+                ${resposta.anexo ? `
+                  <div class="mt-2">
+                    <a href="${resposta.anexo}" target="_blank" class="inline-flex items-center space-x-2 text-green-600 hover:text-green-800">
+                      <span>📎</span>
+                      <span class="text-sm">Anexo da resposta</span>
+                    </a>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      document.getElementById('conteudoDetalhes').innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-3">📋 Informações da Ocorrência</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <p><strong>ID:</strong> #${ocorrencia.id}</p>
+              <p><strong>Status:</strong> <span class="${obterClasseStatus(ocorrencia.status)} px-2 py-1 rounded text-sm">${ocorrencia.status}</span></p>
+              <p><strong>Título:</strong> ${ocorrencia.titulo}</p>
+              <p><strong>Categoria:</strong> <span class="${obterClasseBadge(ocorrencia.categoria)} px-2 py-1 rounded text-sm">${ocorrencia.categoria}</span></p>
+              <p><strong>Data:</strong> ${ocorrencia.data_formatada}</p>
+              ${ocorrencia.anexo ? `<p><strong>Anexo:</strong> <a href="${ocorrencia.anexo}" target="_blank" class="text-blue-600 hover:underline">Ver arquivo</a></p>` : ''}
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-2">📝 Descrição</h4>
+            <p class="text-gray-700">${ocorrencia.descricao}</p>
+          </div>
+          
+          ${respostasHTML}
+          ${historicoHTML}
+        </div>
+      `;
+      
+      document.getElementById('modalDetalhes').classList.remove('hidden');
+    }
+
+    function fecharModalDetalhes() {
+      document.getElementById('modalDetalhes').classList.add('hidden');
+    }
+
+    async function verRespostas(ocorrenciaId) {
+      await verDetalhesOcorrencia(ocorrenciaId);
+    }
+
+    // Fecha modais ao clicar fora
+    document.getElementById('modalResposta').addEventListener('click', function(e) {
+      if (e.target === this) {
+        fecharModalResposta();
+      }
+    });
+
+    document.getElementById('modalDetalhes').addEventListener('click', function(e) {
+      if (e.target === this) {
+        fecharModalDetalhes();
+      }
+    });
+
+    // Envio do formulário de resposta
+    document.getElementById('formResposta').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const botao = this.querySelector('button[type="submit"]');
+
+      // Animação de loading
+      botao.disabled = true;
+      botao.innerHTML = `
+        <div class="flex items-center justify-center space-x-2">
+          <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span>Enviando...</span>
+        </div>
+      `;
+
+      try {
+        const resposta = await fetch('/admin/api/responder', {
+          method: 'POST',
+          body: formData
+        });
+
+        const resultado = await resposta.json();
+
+        if (resposta.ok) {
+          mostrarToast('✅ Resposta enviada com sucesso!', 'success');
+          fecharModalResposta();
+          carregarOcorrenciasAdmin();
+          carregarDadosAdmin();
+        } else {
+          mostrarToast('❌ ' + (resultado.erro || 'Erro ao enviar resposta'), 'error');
+        }
+
+      } catch (erro) {
+        console.error('Erro:', erro);
+        mostrarToast('❌ Erro de conexão com o servidor', 'error');
+      } finally {
+        // Restaura botão
+        botao.disabled = false;
+        botao.innerHTML = `
+          <span>📨</span>
+          <span>Enviar Resposta</span>
+        `;
+      }
+    });
+
+    // ========== SISTEMA DE FILTROS ==========
+    function aplicarFiltros() {
+      renderizarOcorrenciasAdmin(estadoAdmin.ocorrencias);
+    }
+
+    function limparFiltros() {
+      document.getElementById('filtroStatus').value = '';
+      document.getElementById('filtroCategoria').value = '';
+      renderizarOcorrenciasAdmin(estadoAdmin.ocorrencias);
+    }
+
+    function recarregarDados() {
+      carregarOcorrenciasAdmin();
+      carregarDadosAdmin();
+      mostrarToast('🔄 Dados atualizados!', 'info');
+    }
+
+    function mostrarErroCarregamentoAdmin(erro) {
+      const lista = document.getElementById('listaOcorrencias');
+      const semOcorrencias = document.getElementById('semOcorrencias');
+      
+      lista.innerHTML = `
+        <div class="text-center p-8 bg-red-50 border border-red-200 rounded-xl">
+          <div class="text-red-600 text-4xl mb-3">⚠️</div>
+          <h3 class="font-semibold text-red-800 text-lg mb-2">Erro ao carregar ocorrências</h3>
+          <p class="text-red-600 mb-4">${erro.message}</p>
+          <button onclick="carregarOcorrenciasAdmin()" 
+                  class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+            🔄 Tentar Novamente
+          </button>
+        </div>
+      `;
+      
+      if (semOcorrencias) semOcorrencias.classList.add('hidden');
+    }
+
+    function mostrarToast(mensagem, tipo = 'success') {
+      // Remove toast anterior se existir
+      const toastAnterior = document.querySelector('.toast');
+      if (toastAnterior) toastAnterior.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${tipo}`;
+      toast.textContent = mensagem;
+      
+      document.body.appendChild(toast);
+      
+      // Remove automaticamente após 5 segundos
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    // Atualização automática a cada 30 segundos
+    setInterval(() => {
+      if (!estadoAdmin.carregando) {
+        carregarOcorrenciasAdmin();
+        carregarDadosAdmin();
+      }
+    }, 30000);
+
+  </script>
+</body>
+</html> 

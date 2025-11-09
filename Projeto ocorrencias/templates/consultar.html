@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Ocorrências - SIO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-50">
+
+  <header class="bg-white py-6 shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-blue-700">Consultar Ocorrências</h1>
+          <p class="text-gray-600 mt-2">Acompanhe todas as ocorrências registradas no sistema</p>
+        </div>
+        <a href="/" class="btn-secondary rounded-lg px-6 py-2 font-semibold">
+          ← Voltar
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-4 pb-12">
+    
+    <!-- Estatísticas -->
+    <div id="estatisticas" class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white mb-8 fade-in">
+      <div class="flex flex-wrap items-center justify-between">
+        <div class="text-center">
+          <div class="text-3xl font-bold" id="totalOcorrencias">0</div>
+          <div class="text-blue-100">Total de Ocorrências</div>
+        </div>
+        <div class="text-center">
+          <div class="text-xl font-semibold" id="categoriasOcorrencias"></div>
+          <div class="text-blue-100">Distribuição por Categoria</div>
+        </div>
+        <div class="text-center">
+          <button onclick="recarregarOcorrencias()" 
+                  class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-semibold transition-colors">
+            🔄 Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8 fade-in">
+      <h3 class="font-semibold text-gray-800 text-lg mb-4">🔍 Filtrar Ocorrências</h3>
+      <div class="flex flex-wrap gap-4 items-center">
+        <div class="flex-1 min-w-64">
+          <select id="filtroCategoria" class="form-input w-full rounded-lg p-3">
+            <option value="">Todas as categorias</option>
+            <option value="Infraestrutura">🏗️ Infraestrutura</option>
+            <option value="Equipamento">💻 Equipamento</option>
+            <option value="Segurança">🔒 Segurança</option>
+            <option value="Limpeza">🧹 Limpeza</option>
+            <option value="Outros">📦 Outros</option>
+          </select>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="aplicarFiltros()" 
+                  class="btn-primary px-6 py-3 rounded-lg font-semibold">
+            🔍 Aplicar Filtro
+          </button>
+          <button onclick="limparFiltros()" 
+                  class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            🗑️ Limpar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingOcorrencias" class="text-center py-12 hidden">
+      <div class="loading-spinner mb-4"></div>
+      <p class="text-gray-600 font-semibold">Carregando ocorrências...</p>
+    </div>
+
+    <!-- Lista de Ocorrências -->
+    <div id="listaOcorrencias" class="space-y-4 transition-opacity duration-300">
+      <!-- Ocorrências carregadas via JavaScript -->
+    </div>
+
+    <!-- Mensagem quando não há ocorrências -->
+    <div id="semOcorrencias" class="text-center py-16 hidden fade-in">
+      <div class="text-6xl mb-6">📭</div>
+      <h3 class="text-2xl font-bold text-gray-700 mb-4">Nenhuma ocorrência encontrada</h3>
+      <p class="text-gray-500 mb-8 max-w-md mx-auto">
+        Não há ocorrências registradas no momento. Seja o primeiro a registrar uma ocorrência!
+      </p>
+      <div class="space-x-4">
+        <a href="/registrar" class="btn-primary px-8 py-3 rounded-lg font-semibold text-lg">
+          ➕ Registrar Primeira Ocorrência
+        </a>
+        <button onclick="recarregarOcorrencias()" 
+                class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
+          🔄 Recarregar
+        </button>
+      </div>
+    </div>
+
+    <!-- Botão Flutuante -->
+    <div class="fixed bottom-8 right-8">
+      <a href="/registrar" 
+         class="floating-btn bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center">
+        <span class="text-xl">➕</span>
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="bg-white border-t py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <div class="space-x-6 mb-4">
+        <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">🏠 Página Inicial</a>
+        <a href="/registrar" class="text-blue-600 hover:text-blue-800 font-semibold">📝 Nova Ocorrência</a>
+      </div>
+      <p class="text-gray-500">&copy; 2025 SIO - Sistema Integrado de Ocorrências</p>
+    </div>
+  </footer>
+    <!-- Modal de Detalhes com Respostas -->
+    <div id="modalDetalhes" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-800">📋 Detalhes da Ocorrência</h3>
+          <button onclick="fecharModalDetalhes()" class="text-gray-500 hover:text-gray-700 text-2xl">
+            ×
+          </button>
+        </div>
+
+        <div id="conteudoDetalhes">
+          <!-- Conteúdo carregado via JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ========== SISTEMA DE DETALHES ==========
+    async function verDetalhesOcorrencia(ocorrenciaId) {
+      try {
+        const loading = document.getElementById('loadingOcorrencias');
+        if (loading) loading.classList.remove('hidden');
+        
+        const response = await fetch(`/api/ocorrencia/${ocorrenciaId}`);
+        const data = await response.json();
+
+        if (loading) loading.classList.add('hidden');
+        
+        if (response.ok) {
+          abrirModalDetalhes(data);
+        } else {
+          mostrarToast(`❌ ${data.erro}`, 'error');
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        mostrarToast('❌ Erro ao carregar detalhes', 'error');
+      }
+    }
+
+    function abrirModalDetalhes(dados) {
+      const { ocorrencia, respostas } = dados;
+      
+      let respostasHTML = '';
+      if (respostas && respostas.length > 0) {
+        respostasHTML = `
+          <div class="mt-6">
+            <h4 class="font-semibold text-gray-800 mb-3">💬 Respostas da Administração (${respostas.length})</h4>
+            ${respostas.map(resposta => `
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+                <div class="flex justify-between items-start mb-2">
+                  <p class="font-semibold text-blue-800">${resposta.admin_nome || 'Administrador'}</p>
+                  <p class="text-sm text-blue-600">${resposta.data_resposta_formatada}</p>
+                </div>
+                <p class="text-blue-700">${resposta.mensagem}</p>
+                ${resposta.anexo ? `
+                  <div class="mt-2">
+                    <a href="${resposta.anexo}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                      <span>📎</span>
+                      <span class="text-sm">Anexo da resposta</span>
+                    </a>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        respostasHTML = `
+          <div class="mt-6 text-center py-8 bg-gray-50 rounded-lg">
+            <div class="text-4xl mb-3">⏳</div>
+            <h4 class="font-semibold text-gray-700 mb-2">Aguardando resposta</h4>
+            <p class="text-gray-500">Sua ocorrência ainda não foi respondida pela administração.</p>
+          </div>
+        `;
+      }
+
+      const badgeClass = obterClasseBadge(ocorrencia.categoria);
+      const statusClass = obterClasseStatus(ocorrencia.status);
+
+      document.getElementById('conteudoDetalhes').innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-3">📋 Informações da Ocorrência</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <p><strong>ID:</strong> #${ocorrencia.id}</p>
+              <p><strong>Status:</strong> <span class="${statusClass} px-2 py-1 rounded text-sm">${ocorrencia.status}</span></p>
+              <p><strong>Título:</strong> ${ocorrencia.titulo}</p>
+              <p><strong>Categoria:</strong> <span class="${badgeClass} px-2 py-1 rounded text-sm">${ocorrencia.categoria}</span></p>
+              <p><strong>Data:</strong> ${ocorrencia.data_formatada}</p>
+              ${ocorrencia.anexo ? `<p><strong>Anexo:</strong> <a href="${ocorrencia.anexo}" target="_blank" class="text-blue-600 hover:underline">Ver arquivo</a></p>` : ''}
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-2">📝 Descrição</h4>
+            <p class="text-gray-700">${ocorrencia.descricao}</p>
+          </div>
+          
+          ${respostasHTML}
+        </div>
+      `;
+      
+      document.getElementById('modalDetalhes').classList.remove('hidden');
+    }
+
+    function fecharModalDetalhes() {
+      document.getElementById('modalDetalhes').classList.add('hidden');
+    }
+
+    // Fecha modal ao clicar fora
+    document.getElementById('modalDetalhes').addEventListener('click', function(e) {
+      if (e.target === this) {
+        fecharModalDetalhes();
+      }
+    });
+
+    // Adicione estas funções auxiliares se não existirem
+    function obterClasseBadge(categoria) {
+      const classes = {
+        'Infraestrutura': 'badge-infra',
+        'Equipamento': 'badge-equip',
+        'Segurança': 'badge-seguranca',
+        'Limpeza': 'badge-limpeza',
+        'Outros': 'badge-outros'
+      };
+      return classes[categoria] || 'badge-outros';
+    }
+
+    function obterClasseStatus(status) {
+      const classes = {
+        'Pendente': 'status-pendente',
+        'Em Andamento': 'status-andamento',
+        'Resolvido': 'status-resolvido'
+      };
+      return classes[status] || 'status-pendente';
+    }
+  </script>
+</body>
+</html>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

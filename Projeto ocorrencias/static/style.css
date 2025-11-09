@@ -1,0 +1,348 @@
+/* Variáveis de cores */
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1d4ed8;
+  --secondary-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-orange: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --gray-light: #f8fafc;
+  --gray-medium: #e2e8f0;
+  --gray-dark: #64748b;
+  --text-dark: #1e293b;
+}
+
+/* Estilos globais */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Background gradiente moderno */
+.bg-overlay {
+  background: linear-gradient(135deg, 
+    rgba(37, 99, 235, 0.9) 0%, 
+    rgba(59, 130, 246, 0.85) 50%, 
+    rgba(139, 92, 246, 0.8) 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Cards com sombras e hover */
+.card-hover {
+  transition: all 0.3s ease;
+  border: 1px solid var(--gray-medium);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: var(--primary-blue);
+}
+
+/* Botões animados */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::after {
+  left: 100%;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: var(--primary-blue);
+  transform: translateY(-2px);
+}
+
+/* Badges coloridas por categoria */
+.badge-infra {
+  background: linear-gradient(135deg, var(--accent-orange), #f97316);
+  color: white;
+}
+
+.badge-equip {
+  background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+  color: white;
+}
+
+.badge-seguranca {
+  background: linear-gradient(135deg, var(--accent-red), #dc2626);
+  color: white;
+}
+
+.badge-limpeza {
+  background: linear-gradient(135deg, var(--accent-green), #059669);
+  color: white;
+}
+
+.badge-outros {
+  background: linear-gradient(135deg, var(--gray-dark), #475569);
+  color: white;
+}
+
+/* Loading animation */
+.loading-spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid var(--primary-blue);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pulse animation para cards novos */
+.pulse-new {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+}
+
+/* Form inputs melhorados */
+.form-input {
+  transition: all 0.3s ease;
+  border: 2px solid var(--gray-medium);
+}
+
+.form-input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Status indicators */
+.status-pendente {
+  background: linear-gradient(135deg, #fef3c7, #f59e0b);
+  color: #92400e;
+}
+
+.status-andamento {
+  background: linear-gradient(135deg, #dbeafe, var(--primary-blue));
+  color: #1e40af;
+}
+
+.status-resolvido {
+  background: linear-gradient(135deg, #d1fae5, var(--accent-green));
+  color: #065f46;
+}
+
+/* Scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animação de fade in */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+/* Notification toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease;
+}
+
+.toast.success {
+  background: linear-gradient(135deg, var(--accent-green), #059669);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, var(--accent-red), #dc2626);
+}
+
+.toast.info {
+  background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Estilos para preview de arquivo */
+.file-preview {
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border: 2px dashed #3b82f6;
+}
+
+/* Efeito de shimmer para loading */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Botão flutuante */
+.floating-btn {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.floating-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal styles */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Admin specific styles */
+.admin-card {
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.admin-card:hover {
+  border-left-color: #3b82f6;
+  transform: translateX(4px);
+}
+
+/* Badge de resposta */
+.badge-resposta {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+/* Histórico timeline */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0.5rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3b82f6;
+}
+
+.timeline-item.resolvido::before {
+  background: #10b981;
+}
+
+.timeline-item.pendente::before {
+  background: #f59e0b;
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .flex-wrap-mobile {
+    flex-direction: column;
+  }
+}
+
+/* Utilitários extras */
+.hidden {
+  display: none !important;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Animações de transição */
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* Preenche todo o espaço, pode cortar */
+    display: block;
+}
+.container-azul {
+    width: 200px;       /* ou o tamanho que você quiser */
+    height: 200px;
+    background-color: blue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
